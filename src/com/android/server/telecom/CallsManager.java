@@ -342,7 +342,6 @@ public class CallsManager extends Call.ListenerBase
     private final CallAudioManager mCallAudioManager;
     private final CallRecordingTonePlayer mCallRecordingTonePlayer;
     private RespondViaSmsManager mRespondViaSmsManager;
-    private final Ringer mRinger;
     private final InCallWakeLockController mInCallWakeLockController;
     private final CopyOnWriteArrayList<CallsManagerListener> mListeners =
             new CopyOnWriteArrayList<>();
@@ -551,7 +550,7 @@ public class CallsManager extends Call.ListenerBase
                 emergencyCallHelper);
         mCallDiagnosticServiceController = callDiagnosticServiceController;
         mCallDiagnosticServiceController.setInCallTonePlayerFactory(playerFactory);
-        mRinger = new Ringer(playerFactory, context, systemSettingsUtil, asyncRingtonePlayer,
+        final Ringer ringer = new Ringer(playerFactory, context, systemSettingsUtil, asyncRingtonePlayer,
                 ringtoneFactory, systemVibrator,
                 new Ringer.VibrationEffectProxy(), mInCallController);
         mCallRecordingTonePlayer = new CallRecordingTonePlayer(mContext, audioManager,
@@ -559,7 +558,7 @@ public class CallsManager extends Call.ListenerBase
         mCallAudioManager = new CallAudioManager(callAudioRouteStateMachine,
                 this, callAudioModeStateMachineFactory.create(systemStateHelper,
                 (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE)),
-                playerFactory, mRinger, new RingbackPlayer(playerFactory),
+                playerFactory, ringer, new RingbackPlayer(playerFactory),
                 bluetoothStateReceiver, mDtmfLocalTonePlayer);
 
         mConnectionSvrFocusMgr = connectionServiceFocusManagerFactory.create(mRequester);
@@ -5628,10 +5627,5 @@ public class CallsManager extends Call.ListenerBase
     public void requestLogMark(String message) {
         mCalls.forEach(c -> Log.addEvent(c, LogUtils.Events.USER_LOG_MARK, message));
         Log.addEvent(null /* global */, LogUtils.Events.USER_LOG_MARK, message);
-    }
-
-    @VisibleForTesting
-    public Ringer getRinger() {
-        return mRinger;
     }
 }
